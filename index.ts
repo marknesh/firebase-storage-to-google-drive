@@ -1,15 +1,9 @@
-import { Storage } from "@google-cloud/storage";
 import { config } from "dotenv";
-import { google } from "googleapis";
 
 config();
 
-const bucketName = process.env.BUCKET_NAME as string;
-
-async function uploadFile() {
-  const storage = new Storage();
-  return await storage.bucket(bucketName).getFiles();
-}
+import { google } from "googleapis";
+import { listDriveFiles } from "./utils/listDriveFiles";
 
 const SCOPES = ["https://www.googleapis.com/auth/drive"];
 
@@ -31,12 +25,12 @@ async function authorize() {
 authorize()
   .then(async (result) => {
     const drive = google.drive({ version: "v3", auth: result });
-    console.log(result);
-    const response = await drive.files.list({
-      fields: "files(id, name, md5Checksum)",
-    });
 
-    console.log(response?.data.files?.[0]);
+    // const response = await drive.files.list({
+    //   fields: "files(id, name, md5Checksum)",
+    // });
+
+    listDriveFiles(drive);
   })
   .catch((err) => {
     console.log(err);
