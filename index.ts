@@ -1,9 +1,7 @@
-import { config } from "dotenv";
-
-config();
+import "dotenv/config";
 
 import { google } from "googleapis";
-import { listDriveFiles } from "./utils/listDriveFiles";
+import { uploadFile } from "./utils/uploadFile";
 
 const SCOPES = ["https://www.googleapis.com/auth/drive"];
 
@@ -30,7 +28,7 @@ authorize()
     //   fields: "files(id, name, md5Checksum)",
     // });
 
-    listDriveFiles(drive);
+    uploadFile(drive);
   })
   .catch((err) => {
     console.log(err);
