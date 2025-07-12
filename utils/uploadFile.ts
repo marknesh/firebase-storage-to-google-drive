@@ -1,7 +1,9 @@
 import { Storage } from "@google-cloud/storage";
 import { drive_v3 } from "googleapis";
+import { Readable } from "node:stream";
 import { config } from "../config";
 import { listDriveFiles } from "./listDriveFiles";
+import { getFileName } from "./util";
 
 let currentParentId: string = config.folderId;
 const emailAddress = config.emailAddress;
@@ -69,6 +71,9 @@ const createSubFolders = async (filePath: string, drive: drive_v3.Drive) => {
           name: folder,
           parents: [currentParentId],
           mimeType: "application/vnd.google-apps.folder",
+          appProperties: {
+            fullFilePath: filePath,
+          },
         },
       });
 
@@ -104,7 +109,9 @@ export async function uploadFile(drive: drive_v3.Drive) {
 
   const uploadedFileNames = await listDriveFiles(drive);
 
-  const [files] = await storage.bucket(config.bucketName).getFiles();
+  const [files] = await storage
+    .bucket(config.bucketName)
+    .getFiles({ autoPaginate: true });
 
   for (const file of files) {
     if (file.metadata.md5Hash) {
@@ -114,8 +121,13 @@ export async function uploadFile(drive: drive_v3.Drive) {
 
       const driveMd5 = uploadedFileNames.get(file.name);
 
-      if (driveMd5 && firebaseHex && firebaseHex === driveMd5) {
-        console.log(`Skiping ${firebaseHex},${file.name} already uploaded.`);
+      if (
+        driveMd5?.md5CheckSum &&
+        firebaseHex &&
+        firebaseHex === driveMd5.md5CheckSum &&
+        file.name === driveMd5.filePath
+      ) {
+        console.log(`Skipping ${firebaseHex},${file.name} already uploaded.`);
         continue;
       }
 
@@ -124,7 +136,38 @@ export async function uploadFile(drive: drive_v3.Drive) {
       if (slashesCount > 0) {
         const response = await createSubFolders(file.name, drive);
 
+        // prevent creating a file after creating a folder for the first time
+        if (file.name.endsWith("/")) continue;
+
         if (!response?.data?.id) return;
+      }
+
+      if (slashesCount === 0) {
+        currentParentId = config.folderId;
+      }
+
+      const imageStream = file.createReadStream();
+
+      if (file?.name) {
+        await drive.files
+          .create({
+            media: {
+              body: Readable.from(imageStream),
+            },
+            fields: "id,name,appProperties",
+            requestBody: {
+              name: getFileName(file.name),
+              parents: [currentParentId],
+              appProperties: {
+                fullFilePath: file.name,
+              },
+            },
+          })
+          .then(() => {
+            console.log(
+              `file uploaded ${file.name},  ${firebaseHex} ${driveMd5?.filePath}`
+            );
+          });
       }
     }
   }

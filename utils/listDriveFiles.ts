@@ -1,26 +1,41 @@
 import { drive_v3 } from "googleapis";
 
-const FOLDER_ID = process.env.FOLDER_ID?.trim() as string;
-
 export const listDriveFiles = async (drive: drive_v3.Drive) => {
   const files = [];
-  let pageToken;
+  let pageToken: string | undefined;
   do {
-    const res = await drive.files.list({
-      q: `'${FOLDER_ID}' in parents and trashed = false`,
-      fields: "files(name,id,md5Checksum),nextPageToken",
-      // spaces: "drive",
-    });
-    if (res.data.files) {
-      files.push(...res.data.files);
-      pageToken = res.data.nextPageToken;
+    const { data }: { data: drive_v3.Schema$FileList } = await drive.files.list(
+      {
+        q: `trashed = false`,
+        fields: "files(name,id,md5Checksum,appProperties),nextPageToken",
+        pageToken,
+      }
+    );
+    if (data.files) {
+      files.push(...data.files);
+
+      pageToken = data.nextPageToken ?? undefined;
     }
   } while (pageToken);
 
   const map = new Map();
+
+  // for (const file of files) {
+  //   try {
+  //     await drive.files.delete({ fileId: file.id });
+  //     console.log("Deleted", file);
+  //   } catch (err) {
+  //     console.error(`Failed to delete ${file}:`, err.message);
+  //     // optionally: log, skip, retry, or collect failed items
+  //   }
+  // }
+
   for (const file of files) {
     if (file.name && file.md5Checksum) {
-      map.set(file.name, file.md5Checksum);
+      map.set(file?.appProperties?.fullFilePath, {
+        md5CheckSum: file.md5Checksum,
+        filePath: file?.appProperties?.fullFilePath,
+      });
     }
   }
 
