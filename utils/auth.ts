@@ -1,4 +1,5 @@
 import { google } from "googleapis";
+import { config } from "../config";
 
 const SCOPES = ["https://www.googleapis.com/auth/drive"];
 
@@ -11,7 +12,10 @@ const SCOPES = ["https://www.googleapis.com/auth/drive"];
 export async function authorize() {
   const JWTClient = await google.auth.getClient({
     scopes: SCOPES,
-    keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+    credentials: {
+      client_email: config.clientEmail,
+      private_key: config.privateKey?.replace(/\\n/g, "\n"),
+    },
   });
 
   return JWTClient;

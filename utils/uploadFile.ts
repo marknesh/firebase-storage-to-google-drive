@@ -127,7 +127,9 @@ export async function uploadFile(drive: drive_v3.Drive) {
         firebaseHex === driveMd5.md5CheckSum &&
         file.name === driveMd5.filePath
       ) {
-        console.log(`Skipping ${firebaseHex},${file.name} already uploaded.`);
+        console.log(
+          `Skipping ${firebaseHex} ${driveMd5.md5CheckSum},${file.name} already uploaded.`
+        );
         continue;
       }
 
@@ -148,7 +150,26 @@ export async function uploadFile(drive: drive_v3.Drive) {
 
       const imageStream = file.createReadStream();
 
-      if (file?.name) {
+      if (
+        file.name === driveMd5?.filePath &&
+        firebaseHex !== driveMd5?.md5CheckSum
+      ) {
+        await drive.files
+          .update({
+            fileId: driveMd5.fileId,
+            media: {
+              body: Readable.from(imageStream),
+            },
+            requestBody: {
+              name: getFileName(file.name),
+              appProperties: {
+                fullFilePath: file.name,
+              },
+            },
+          })
+          .then(() => console.log(`file ${file.name} updated successfully`))
+          .catch((err) => console.log(err.response.data));
+      } else if (file?.name) {
         await drive.files
           .create({
             media: {

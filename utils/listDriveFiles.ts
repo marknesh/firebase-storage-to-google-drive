@@ -19,6 +19,7 @@ export const listDriveFiles = async (drive: drive_v3.Drive) => {
   } while (pageToken);
 
   const map = new Map();
+  console.log(files.length);
 
   // for (const file of files) {
   //   try {
@@ -35,6 +36,7 @@ export const listDriveFiles = async (drive: drive_v3.Drive) => {
       map.set(file?.appProperties?.fullFilePath, {
         md5CheckSum: file.md5Checksum,
         filePath: file?.appProperties?.fullFilePath,
+        fileId: file.id,
       });
     }
   }
