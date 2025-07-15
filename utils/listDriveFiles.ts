@@ -19,7 +19,7 @@ export const listDriveFiles = async (drive: drive_v3.Drive) => {
   } while (pageToken);
 
   const map = new Map();
-  console.log(files.length);
+  console.log(`You have ${files.length} files`);
 
   /* delete files */
   // for (const file of files) {

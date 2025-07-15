@@ -104,10 +104,15 @@ const createSubFolders = async (filePath: string, drive: drive_v3.Drive) => {
   return response;
 };
 
+/**
+ * Uploads files to google drive
+ * @param {drive_v3.Drive} drive
+ * @returns {Promise<void>}
+ */
 export async function uploadFile(drive: drive_v3.Drive) {
   const storage = new Storage();
 
-  const uploadedFileNames = await listDriveFiles(drive);
+  const filesInGoogleDrive = await listDriveFiles(drive);
 
   const [files] = await storage
     .bucket(config.bucketName)
@@ -119,13 +124,13 @@ export async function uploadFile(drive: drive_v3.Drive) {
         "hex"
       );
 
-      const driveMd5 = uploadedFileNames.get(file.name);
+      const matchingDriveFile = filesInGoogleDrive.get(file.name);
 
       if (
-        driveMd5?.md5CheckSum &&
+        matchingDriveFile?.md5CheckSum &&
         firebaseHex &&
-        firebaseHex === driveMd5.md5CheckSum &&
-        file.name === driveMd5.filePath
+        firebaseHex === matchingDriveFile.md5CheckSum &&
+        file.name === matchingDriveFile.filePath
       ) {
         console.log(`Skipping ${file.name}, already uploaded.`);
         continue;
@@ -149,12 +154,12 @@ export async function uploadFile(drive: drive_v3.Drive) {
       const imageStream = file.createReadStream();
 
       if (
-        file.name === driveMd5?.filePath &&
-        firebaseHex !== driveMd5?.md5CheckSum
+        file.name === matchingDriveFile?.filePath &&
+        firebaseHex !== matchingDriveFile?.md5CheckSum
       ) {
         await drive.files
           .update({
-            fileId: driveMd5.fileId,
+            fileId: matchingDriveFile.fileId,
             media: {
               body: Readable.from(imageStream),
             },
@@ -184,7 +189,7 @@ export async function uploadFile(drive: drive_v3.Drive) {
           })
           .then(() => {
             console.log(
-              `file uploaded ${file.name},  ${firebaseHex} ${driveMd5?.filePath}`
+              `file uploaded ${file.name},  ${firebaseHex} ${matchingDriveFile?.filePath}`
             );
           });
       }
