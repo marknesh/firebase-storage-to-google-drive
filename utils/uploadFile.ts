@@ -127,9 +127,7 @@ export async function uploadFile(drive: drive_v3.Drive) {
         firebaseHex === driveMd5.md5CheckSum &&
         file.name === driveMd5.filePath
       ) {
-        console.log(
-          `Skipping ${firebaseHex} ${driveMd5.md5CheckSum},${file.name} already uploaded.`
-        );
+        console.log(`Skipping ${file.name}, already uploaded.`);
         continue;
       }
 

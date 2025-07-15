@@ -21,6 +21,7 @@ export const listDriveFiles = async (drive: drive_v3.Drive) => {
   const map = new Map();
   console.log(files.length);
 
+  /* delete files */
   // for (const file of files) {
   //   try {
   //     await drive.files.delete({ fileId: file.id });
