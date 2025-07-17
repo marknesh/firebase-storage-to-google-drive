@@ -15,3 +15,9 @@ pnpm install
 - Create a `.env` based on the `.env.example` and fill all values
 
 - Run `pnpm run dev`
+
+### Deploying Instructions
+
+```
+gcloud run jobs deploy upload-to-drive --set-env-vars BUCKET_NAME=your-bucket-name,EMAIL_ADDRESS=email-address-of-your-drive-account,FOLDER_ID=folder-id-of-uploading-the-files
+```
