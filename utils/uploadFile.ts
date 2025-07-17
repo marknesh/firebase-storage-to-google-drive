@@ -77,6 +77,7 @@ const createSubFolders = async (filePath: string, drive: drive_v3.Drive) => {
         },
       });
 
+      /* give access to the email address to enable it to view the folder */
       if (driveResponse?.data?.id) {
         currentParentId = driveResponse?.data?.id;
         response = await drive.permissions.create({
