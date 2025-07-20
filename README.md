@@ -7,7 +7,7 @@ This Cloud Run Job uploads files from a Google Cloud Storage bucket to Google Dr
 - Clone the repository
 
 ```bash
-git clone https://github.com/your-username/firebase-storage-to-drive.git
+git clone https://github.com/marknesh/firebase-storage-to-drive.git
 cd firebase-storage-to-drive
 pnpm install
 ```
