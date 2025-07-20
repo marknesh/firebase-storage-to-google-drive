@@ -1,6 +1,6 @@
 # Firebase Storage To Google Drive
 
-This Cloud Run Job uploads files from a Google Cloud Storage bucket to Google Drive.
+This Cloud Run Job uploads files from a Google Cloud Storage bucket to Google Drive. It supports large file transfers with an execution timeout of up to 24 hours (or up to 7 days in preview), making it suitable for long-running uploads.
 
 ## ⚙️ Setup Instructions
 
