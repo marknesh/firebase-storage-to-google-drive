@@ -46,8 +46,7 @@ const createSubFolders = async (filePath: string, drive: drive_v3.Drive) => {
       driveFolders?.data?.files && driveFolders?.data.files?.length > 0;
 
     /* drive api takes time to load newly created files, so will use it only when
-    the folder does not exist in local cache.> Cache is used only when
-    uploading existing files since firebase cloud functions are stateless
+    the folder does not exist in local cache.
 
     https://stackoverflow.com/questions/67571418/google-drive-api-files-list-not-refreshing
     */
