@@ -24,7 +24,7 @@ pnpm install
   gcloud auth login
   ```
 
-- Set up with your project id
+- Set up with your project id of the Firebase project where you want to use Cloud Storage.
 
   ```
   gcloud config set project PROJECT_ID
