@@ -1,6 +1,10 @@
 import { drive_v3 } from "googleapis";
 
-// Show all files in google drive
+/**
+ *
+ * @param drive
+ * @description Lists all files in Google Drive and returns a map of file paths to their metadata
+ */
 export const listDriveFiles = async (drive: drive_v3.Drive) => {
   const files = [];
   let pageToken: string | undefined;
@@ -20,7 +24,7 @@ export const listDriveFiles = async (drive: drive_v3.Drive) => {
   } while (pageToken);
 
   const map = new Map();
-  console.log(`You have ${files.length} files`);
+  console.log(`You have ${files.length} files in your Google Drive.`);
 
   for (const file of files) {
     if (file.name && file.md5Checksum) {
