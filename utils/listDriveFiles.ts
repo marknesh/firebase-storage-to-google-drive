@@ -22,17 +22,6 @@ export const listDriveFiles = async (drive: drive_v3.Drive) => {
   const map = new Map();
   console.log(`You have ${files.length} files`);
 
-  /* delete files */
-  // for (const file of files) {
-  //   try {
-  //     await drive.files.delete({ fileId: file.id });
-  //     console.log("Deleted", file);
-  //   } catch (err) {
-  //     console.error(`Failed to delete ${file}:`, err.message);
-  //     // optionally: log, skip, retry, or collect failed items
-  //   }
-  // }
-
   for (const file of files) {
     if (file.name && file.md5Checksum) {
       map.set(file?.appProperties?.fullFilePath, {
