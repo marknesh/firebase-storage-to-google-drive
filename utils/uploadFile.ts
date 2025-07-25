@@ -178,7 +178,7 @@ export async function uploadFile(drive: drive_v3.Drive) {
             media: {
               body: Readable.from(imageStream),
             },
-            fields: "id,name,kk,appProperties",
+            fields: "id,name,appProperties",
             requestBody: {
               name: getFileName(file.name),
               parents: [currentParentId],
@@ -188,11 +188,9 @@ export async function uploadFile(drive: drive_v3.Drive) {
             },
           })
           .then(() => {
-            console.log(
-              `file uploaded ${file.name},  ${firebaseHex} ${matchingDriveFile?.filePath}`
-            );
+            console.log(`file uploaded ${file.name} successfully`);
           })
-          .catch((err) => console.log(err.response.data));
+          .catch((err) => console.log(err.response.data.error));
       }
     }
   }
