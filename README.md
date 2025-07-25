@@ -33,5 +33,5 @@ pnpm install
 - Deploy the function
 
   ```
-  gcloud run jobs deploy upload-to-drive --set-env-vars BUCKET_NAME=your-bucket-name,EMAIL_ADDRESS=email-address-of-your-drive-account,FOLDER_ID=folder-id-of-uploading-the-files
+  gcloud run jobs deploy upload-to-drive --set-env-vars BUCKET_NAME=your-bucket-name,EMAIL_ADDRESS=email-address-of-your-drive-account,FOLDER_ID=folder-id-of-uploading-the-files --task-timeout 18h
   ```
