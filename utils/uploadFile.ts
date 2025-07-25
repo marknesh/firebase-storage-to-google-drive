@@ -170,8 +170,7 @@ export async function uploadFile(drive: drive_v3.Drive) {
               },
             },
           })
-          .then(() => console.log(`file ${file.name} updated successfully`))
-          .catch((err) => console.log(err.response.data));
+          .then(() => console.log(`file ${file.name} updated successfully`));
       } else if (file?.name) {
         await drive.files
           .create({
@@ -189,8 +188,7 @@ export async function uploadFile(drive: drive_v3.Drive) {
           })
           .then(() => {
             console.log(`file uploaded ${file.name} successfully`);
-          })
-          .catch((err) => console.log(err.response.data.error));
+          });
       }
     }
   }

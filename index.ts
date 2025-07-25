@@ -8,8 +8,13 @@ const auth = new Auth();
 auth
   .getJWTClient()
   .then(async (jwtClient) => {
-    console.log(jwtClient);
     const drive = google.drive({ version: "v3", auth: jwtClient });
+
+    const res = await drive.about.get({
+      fields: "storageQuota",
+    });
+
+    console.log("Storage quota:", res.data.storageQuota);
 
     uploadFile(drive);
   })

@@ -12,7 +12,11 @@ cd firebase-storage-to-drive
 pnpm install
 ```
 
+- Download your Private Key JSON file from firebase.
+
 - Create a `.env` based on the `.env.example` and fill all values
+
+- In Google Drive, share editor access to your folder with the Service Account Client Email
 
 - Run `pnpm run dev`
 
@@ -35,3 +39,7 @@ pnpm install
   ```
   gcloud run jobs deploy upload-to-drive --set-env-vars BUCKET_NAME=your-bucket-name,EMAIL_ADDRESS=email-address-of-your-drive-account,FOLDER_ID=folder-id-of-uploading-the-files --task-timeout 18h
   ```
+
+- Share Editor access to your folder with the Compute Engine Service Account Email in the format `[PROJECT-NUMBER]-compute@<YOUR-PROJECT-ID>.developer.gserviceaccount.com` or check [the list of your service accounts](https://console.cloud.google.com/iam-admin/serviceaccounts).
+
+- Run your cloud run job
