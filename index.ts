@@ -1,12 +1,15 @@
 import "dotenv/config";
 
 import { google } from "googleapis";
-import { authorize } from "./utils/auth";
+import { Auth } from "./utils/auth";
 import { uploadFile } from "./utils/uploadFile";
 
-authorize()
-  .then(async (result) => {
-    const drive = google.drive({ version: "v3", auth: result });
+const auth = new Auth();
+auth
+  .getJWTClient()
+  .then(async (jwtClient) => {
+    console.log(jwtClient);
+    const drive = google.drive({ version: "v3", auth: jwtClient });
 
     uploadFile(drive);
   })
