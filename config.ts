@@ -11,6 +11,8 @@ function requireEnv(name: string): string {
 
 export const config = {
   bucketName: requireEnv("BUCKET_NAME") as string,
-  folderId: requireEnv("FOLDER_ID") as string,
   emailAddress: requireEnv("EMAIL_ADDRESS") as string,
+  folderId: requireEnv("FOLDER_ID") as string,
+  sharedDriveId: requireEnv("SHARED_DRIVE_ID") as string,
+  useSharedDrive: requireEnv("USE_SHARED_DRIVE") as string,
 };

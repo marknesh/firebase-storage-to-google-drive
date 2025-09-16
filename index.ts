@@ -1,22 +1,14 @@
 import "dotenv/config";
 
-import { google } from "googleapis";
-import { Auth } from "./utils/auth";
 import { uploadFile } from "./utils/uploadFile";
+import { driveClient } from "./utils/util";
 
-const auth = new Auth();
-auth
-  .getJWTClient()
-  .then(async (jwtClient) => {
-    const drive = google.drive({ version: "v3", auth: jwtClient });
+driveClient
+  .getStorageQuota()
+  .then(async (quota) => {
+    console.log("Storage quota:", quota);
 
-    const res = await drive.about.get({
-      fields: "storageQuota",
-    });
-
-    console.log("Storage quota:", res.data.storageQuota);
-
-    uploadFile(drive);
+    uploadFile();
   })
   .catch((err) => {
     console.log(err);

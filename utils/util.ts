@@ -1,3 +1,6 @@
+import { config } from "../config";
+import { DriveClient } from "../lib/driveService";
+
 export const getFileName = (filePath: string) => {
   const slashesCount = (filePath.match(/\//g) || []).length;
 
@@ -11,3 +14,13 @@ export const getFileName = (filePath: string) => {
     return filePath;
   }
 };
+
+export const checkIfUseSharedDrive = () => {
+  if (config.useSharedDrive === "true" && !config.sharedDriveId) {
+    throw new Error("Please enter the shared drive id");
+  }
+};
+
+export const useSharedDrive = config.useSharedDrive === "true";
+
+export const driveClient = new DriveClient();

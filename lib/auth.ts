@@ -1,6 +1,10 @@
 import { google } from "googleapis";
+import { useSharedDrive } from "../utils/util";
 
-const SCOPES = ["https://www.googleapis.com/auth/drive"];
+const DRIVE_SCOPES = {
+  FULL: "https://www.googleapis.com/auth/drive",
+  FILE: "https://www.googleapis.com/auth/drive.file",
+};
 
 /**
  * Class to handle Google Drive authentication
@@ -9,7 +13,7 @@ const SCOPES = ["https://www.googleapis.com/auth/drive"];
 export class Auth {
   async getJWTClient() {
     const jwtClient = await google.auth.getClient({
-      scopes: SCOPES,
+      scopes: [useSharedDrive ? DRIVE_SCOPES.FULL : DRIVE_SCOPES.FILE],
     });
     return jwtClient;
   }
