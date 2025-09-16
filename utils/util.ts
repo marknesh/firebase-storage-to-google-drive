@@ -1,4 +1,5 @@
 import { config } from "../config";
+import { Auth } from "../lib/auth";
 import { DriveClient } from "../lib/driveService";
 
 export const getFileName = (filePath: string) => {
@@ -23,4 +24,4 @@ export const checkIfUseSharedDrive = () => {
 
 export const useSharedDrive = config.useSharedDrive === "true";
 
-export const driveClient = new DriveClient();
+export const driveClient = new DriveClient(new Auth());
