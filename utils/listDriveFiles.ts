@@ -1,27 +1,12 @@
-import { drive_v3 } from "googleapis";
+import { driveClient } from "./util";
 
 /**
  *
  * @param drive
  * @description Lists all files in Google Drive and returns a map of file paths to their metadata
  */
-export const listDriveFiles = async (drive: drive_v3.Drive) => {
-  const files = [];
-  let pageToken: string | undefined;
-  do {
-    const { data }: { data: drive_v3.Schema$FileList } = await drive.files.list(
-      {
-        q: `trashed = false`,
-        fields: "files(name,id,md5Checksum,appProperties),nextPageToken",
-        pageToken,
-      }
-    );
-    if (data.files) {
-      files.push(...data.files);
-
-      pageToken = data.nextPageToken ?? undefined;
-    }
-  } while (pageToken);
+export const listDriveFilesWithMd5CheckSum = async () => {
+  const files = await driveClient.listFiles("trashed = false");
 
   const map = new Map();
   console.log(`You have ${files.length} files in your Google Drive.`);
