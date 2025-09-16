@@ -1,6 +1,7 @@
 import { drive_v3, google } from "googleapis";
 import { Readable } from "node:stream";
 import { config } from "../config";
+import { extractError } from "../utils/errors";
 import {
   checkIfUseSharedDrive,
   getFileName,
@@ -10,17 +11,20 @@ import { Auth } from "./auth";
 
 export class DriveClient {
   private drive: null | drive_v3.Drive = null;
-  constructor() {}
+  constructor(private auth: Auth) {}
 
   async initDrive() {
     if (!this.drive) {
-      const auth = new Auth();
-      const jwtClient = await auth.getJWTClient();
-
-      this.drive = google.drive({
-        version: "v3",
-        auth: jwtClient,
-      });
+      try {
+        const jwtClient = await this.auth.getJWTClient();
+        this.drive = google.drive({
+          version: "v3",
+          auth: jwtClient,
+        });
+      } catch (error) {
+        const message = extractError(error);
+        throw new Error(message);
+      }
     }
     return this.drive;
   }
@@ -30,11 +34,16 @@ export class DriveClient {
    */
   async getStorageQuota() {
     const drive = await this.initDrive();
-    const res = await drive.about.get({
-      fields: "storageQuota",
-    });
+    try {
+      const res = await drive.about.get({
+        fields: "storageQuota",
+      });
 
-    return res.data.storageQuota;
+      return res.data.storageQuota;
+    } catch (error) {
+      const message = extractError(error);
+      throw new Error(message);
+    }
   }
 
   async listFiles(queryParts: string) {
@@ -42,33 +51,38 @@ export class DriveClient {
 
     let pageToken: string | undefined;
     let files = [];
-    const drive = await this.initDrive();
-    const baseOptions: any = {
-      q: queryParts,
-      fields:
-        "files(id, name, mimeType, parents, md5Checksum, appProperties),nextPageToken",
-      pageToken,
-    };
+    try {
+      const drive = await this.initDrive();
+      const baseOptions: any = {
+        q: queryParts,
+        fields:
+          "files(id, name, mimeType, parents, md5Checksum, appProperties),nextPageToken",
+        pageToken,
+      };
 
-    if (useSharedDrive) {
-      Object.assign(baseOptions, {
-        corpora: "drive",
-        driveId: config.sharedDriveId,
-        includeItemsFromAllDrives: true,
-        supportsAllDrives: true,
-      });
-    }
-
-    do {
-      const res = await drive.files.list({ ...baseOptions, pageToken });
-      if (res.data.files?.length) {
-        files.push(...res.data.files);
+      if (useSharedDrive) {
+        Object.assign(baseOptions, {
+          corpora: "drive",
+          driveId: config.sharedDriveId,
+          includeItemsFromAllDrives: true,
+          supportsAllDrives: true,
+        });
       }
 
-      pageToken = res.data.nextPageToken || undefined;
-    } while (pageToken);
+      do {
+        const res = await drive.files.list({ ...baseOptions, pageToken });
+        if (res.data.files?.length) {
+          files.push(...res.data.files);
+        }
 
-    return files;
+        pageToken = res.data.nextPageToken || undefined;
+      } while (pageToken);
+
+      return files;
+    } catch (error) {
+      const message = extractError(error);
+      throw new Error(message);
+    }
   }
 
   /**
@@ -83,6 +97,7 @@ export class DriveClient {
     filePath?: string; // optional app property
   }) {
     checkIfUseSharedDrive();
+
     const drive = await this.initDrive();
 
     const { name, mimeType, parentId, filePath, dataStream } = options;
@@ -110,9 +125,9 @@ export class DriveClient {
       const res = await drive.files.create(request);
       console.log("file created " + res.data.name);
       return res.data; // { id, name, parents }
-    } catch (err: unknown) {
-      console.error("❌ Failed to create file:", err);
-      throw new Error("Drive file creation failed.");
+    } catch (error) {
+      const message = extractError(error);
+      throw new Error(message);
     }
   }
 
@@ -155,9 +170,9 @@ export class DriveClient {
       const res = await drive.files.update(request);
       console.log("file updated" + res.data.name);
       return res.data; // { id, name, parents }
-    } catch (err: unknown) {
-      console.error("❌ Failed to update file:", err);
-      throw new Error("Drive file update failed.");
+    } catch (error) {
+      const message = extractError(error);
+      throw new Error(message);
     }
   }
 
@@ -181,7 +196,7 @@ export class DriveClient {
     const drive = await this.initDrive();
 
     try {
-      const res = await drive.permissions.create({
+      await drive.permissions.create({
         fileId,
         sendNotificationEmail: false, // avoids sending Google email
         fields: "id",
@@ -191,22 +206,24 @@ export class DriveClient {
           emailAddress,
         },
       });
-
-      return res.data; // { id }
-    } catch (err: unknown) {
-      console.error(`❌ Failed to set permission for ${emailAddress}:`, err);
-      throw new Error("Drive permission creation failed.");
+    } catch (error) {
+      const message = extractError(error);
+      throw new Error(message);
     }
   }
 
   async deleteFile(fileId: string) {
     const drive = await this.initDrive();
 
-    const res = await drive.files.delete({
-      fileId,
-      supportsAllDrives: useSharedDrive,
-    });
-    return res.data;
+    await drive.files
+      .delete({
+        fileId,
+        supportsAllDrives: useSharedDrive,
+      })
+      .catch((error) => {
+        const message = extractError(error);
+        throw new Error(message);
+      });
   }
 
   async deleteFilesRecursively(query: string): Promise<void> {
@@ -227,7 +244,6 @@ export class DriveClient {
           `'${file.id}' in parents and trashed = false`
         );
         if (file.id === config.folderId) continue;
-        console.log(file.name);
       }
 
       await this.deleteFile(file.id);

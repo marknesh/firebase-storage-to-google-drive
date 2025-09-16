@@ -1,4 +1,5 @@
 import { google } from "googleapis";
+import { extractError } from "../utils/errors";
 import { useSharedDrive } from "../utils/util";
 
 const DRIVE_SCOPES = {
@@ -12,9 +13,14 @@ const DRIVE_SCOPES = {
  */
 export class Auth {
   async getJWTClient() {
-    const jwtClient = await google.auth.getClient({
-      scopes: [useSharedDrive ? DRIVE_SCOPES.FULL : DRIVE_SCOPES.FILE],
-    });
-    return jwtClient;
+    try {
+      const jwtClient = await google.auth.getClient({
+        scopes: [useSharedDrive ? DRIVE_SCOPES.FULL : DRIVE_SCOPES.FILE],
+      });
+      return jwtClient;
+    } catch (error) {
+      const message = extractError(error);
+      throw message;
+    }
   }
 }
