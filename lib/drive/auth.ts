@@ -20,7 +20,7 @@ export class Auth {
       return jwtClient;
     } catch (error) {
       const message = extractError(error);
-      throw message;
+      throw new Error(message);
     }
   }
 }
