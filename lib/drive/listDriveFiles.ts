@@ -1,4 +1,4 @@
-import { driveClient } from "./util";
+import { driveClient } from "@/utils/util";
 
 /**
  *
@@ -12,10 +12,11 @@ export const listDriveFilesWithMd5CheckSum = async () => {
   console.log(`You have ${files.length} files in your Google Drive.`);
 
   for (const file of files) {
-    if (file.name && file.md5Checksum) {
-      map.set(file?.appProperties?.fullFilePath, {
+    /* folders in drive don`t have md5CheckSum */
+    if (file?.properties?.fullFilePath && file.md5Checksum) {
+      map.set(file?.properties?.fullFilePath, {
         md5CheckSum: file.md5Checksum,
-        filePath: file?.appProperties?.fullFilePath,
+        filePath: file?.properties?.fullFilePath,
         fileId: file.id,
       });
     }

@@ -1,7 +1,7 @@
+import { config } from "@/config";
+import { listDriveFilesWithMd5CheckSum } from "@/lib/drive/listDriveFiles";
+import { driveClient, getFileName, useSharedDrive } from "@/utils/util";
 import { Storage } from "@google-cloud/storage";
-import { config } from "../config";
-import { listDriveFilesWithMd5CheckSum } from "./listDriveFiles";
-import { driveClient, getFileName, useSharedDrive } from "./util";
 
 let currentParentId: string = useSharedDrive
   ? config.sharedDriveId
@@ -57,7 +57,6 @@ const createSubFolders = async (filePath: string) => {
         name: folder,
         parentId: currentParentId,
         mimeType: "application/vnd.google-apps.folder",
-        filePath: filePath,
       });
 
       if (driveResponse.id) {
@@ -95,23 +94,8 @@ export async function uploadFile() {
     .getFiles({ autoPaginate: true });
 
   for (const file of files) {
+    /* folders and files have md5Hash, folders in drive don`t have md5Checksum */
     if (file.metadata.md5Hash) {
-      const firebaseHex = Buffer.from(file.metadata.md5Hash, "base64").toString(
-        "hex"
-      );
-
-      const matchingDriveFile = filesInGoogleDrive.get(file.name);
-
-      if (
-        matchingDriveFile?.md5CheckSum &&
-        firebaseHex &&
-        firebaseHex === matchingDriveFile.md5CheckSum &&
-        file.name === matchingDriveFile.filePath
-      ) {
-        console.log(`Skipping ${file.name}, already uploaded.`);
-        continue;
-      }
-
       const slashesCount = (file.name.match(/\//g) || []).length;
 
       if (slashesCount > 0) {
@@ -127,6 +111,21 @@ export async function uploadFile() {
           : config.folderId;
       }
 
+      const firebaseHex = Buffer.from(file.metadata.md5Hash, "base64").toString(
+        "hex"
+      );
+
+      const matchingDriveFile = filesInGoogleDrive.get(file.name);
+
+      if (
+        matchingDriveFile?.md5CheckSum &&
+        firebaseHex &&
+        firebaseHex === matchingDriveFile?.md5CheckSum
+      ) {
+        console.log(`Skipping ${file.name}, already uploaded.`);
+        continue;
+      }
+
       const imageStream = file.createReadStream();
 
       if (
@@ -138,7 +137,6 @@ export async function uploadFile() {
           fileId: matchingDriveFile.fileId,
           dataStream: imageStream,
           name: file.name,
-          filePath: file.name,
         });
       } else if (file?.name) {
         console.log(`uploading ${file.name}`);

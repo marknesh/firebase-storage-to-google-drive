@@ -1,12 +1,12 @@
+import { config } from "@/config";
+import { extractError } from "@/utils/errors";
 import { drive_v3, google } from "googleapis";
 import { Readable } from "node:stream";
-import { config } from "../config";
-import { extractError } from "../utils/errors";
 import {
   checkIfUseSharedDrive,
   getFileName,
   useSharedDrive,
-} from "../utils/util";
+} from "../../utils/util";
 import { Auth } from "./auth";
 
 export class DriveClient {
@@ -56,7 +56,7 @@ export class DriveClient {
       const baseOptions: any = {
         q: queryParts,
         fields:
-          "files(id, name, mimeType, parents, md5Checksum, appProperties),nextPageToken",
+          "files(id, name, mimeType, parents, md5Checksum, properties),nextPageToken",
         pageToken,
       };
 
@@ -108,7 +108,7 @@ export class DriveClient {
         name,
         mimeType: mimeType || undefined,
         parents: [parentId],
-        appProperties: filePath ? { fullFilePath: filePath } : undefined,
+        properties: filePath ? { fullFilePath: filePath } : undefined,
       },
       supportsAllDrives: useSharedDrive,
     };
@@ -126,6 +126,7 @@ export class DriveClient {
       console.log("file created " + res.data.name);
       return res.data; // { id, name, parents }
     } catch (error) {
+      console.log("cannot create file");
       const message = extractError(error);
       throw new Error(message);
     }
@@ -144,7 +145,7 @@ export class DriveClient {
     checkIfUseSharedDrive();
     const drive = await this.initDrive();
 
-    const { name, fileId, filePath, dataStream } = options;
+    const { name, fileId, dataStream } = options;
 
     const request: drive_v3.Params$Resource$Files$Update = {
       fileId,
@@ -153,7 +154,6 @@ export class DriveClient {
       },
       requestBody: {
         name: getFileName(name),
-        appProperties: filePath ? { fullFilePath: filePath } : undefined,
       },
       supportsAllDrives: useSharedDrive ? true : false,
     };
