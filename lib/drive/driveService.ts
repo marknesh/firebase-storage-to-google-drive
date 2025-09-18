@@ -1,13 +1,13 @@
 import { config } from "@/config";
+import { Auth } from "@/lib/drive/auth";
 import { extractError } from "@/utils/errors";
-import { drive_v3, google } from "googleapis";
-import { Readable } from "node:stream";
 import {
   checkIfUseSharedDrive,
   getFileName,
   useSharedDrive,
-} from "../../utils/util";
-import { Auth } from "./auth";
+} from "@/utils/util";
+import { drive_v3, google } from "googleapis";
+import { Readable } from "node:stream";
 
 export class DriveClient {
   private drive: null | drive_v3.Drive = null;
@@ -88,6 +88,11 @@ export class DriveClient {
   /**
    * Create a folder or file in Drive.
    * Supports both user Drive and Shared Drives.
+   * @param {string} name name of file being created
+   * @param {string} parentId id of parent folder
+   * @param {Readable} dataStream the readable stream of file (if not a folder)
+   * @param {string} mimeType if folder add mimetype inorder to create folder, otherwise ignore
+   * @param {string} filePath full file path of file in firebase storage so as to check if it exists when running the cloud job
    */
   async createFile(options: {
     name: string;
@@ -113,10 +118,11 @@ export class DriveClient {
       supportsAllDrives: useSharedDrive,
     };
 
+    /* If not a folder creation */
     if (dataStream) {
       Object.assign(request, {
         media: {
-          body: Readable.from(dataStream),
+          body: dataStream,
         },
       });
     }
@@ -140,7 +146,6 @@ export class DriveClient {
     name: string;
     fileId: string;
     dataStream: Readable;
-    filePath?: string; // optional app property
   }) {
     checkIfUseSharedDrive();
     const drive = await this.initDrive();
@@ -150,21 +155,13 @@ export class DriveClient {
     const request: drive_v3.Params$Resource$Files$Update = {
       fileId,
       media: {
-        body: Readable.from(dataStream),
+        body: dataStream,
       },
       requestBody: {
         name: getFileName(name),
       },
       supportsAllDrives: useSharedDrive ? true : false,
     };
-
-    if (dataStream) {
-      Object.assign(request, {
-        media: {
-          body: Readable.from(dataStream),
-        },
-      });
-    }
 
     try {
       const res = await drive.files.update(request);
