@@ -1,7 +1,7 @@
 import "dotenv/config";
 
-import { uploadFile } from "./utils/uploadFile";
-import { driveClient } from "./utils/util";
+import { uploadFile } from "@/lib/drive/uploadFile";
+import { driveClient } from "@/utils/util";
 
 driveClient
   .getStorageQuota()

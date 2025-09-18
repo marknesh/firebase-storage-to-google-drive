@@ -1,6 +1,6 @@
-import { config } from "../config";
-import { Auth } from "../lib/auth";
-import { DriveClient } from "../lib/driveService";
+import { config } from "@/config";
+import { Auth } from "@/lib/drive/auth";
+import { DriveClient } from "@/lib/drive/driveService";
 
 export const getFileName = (filePath: string) => {
   const slashesCount = (filePath.match(/\//g) || []).length;

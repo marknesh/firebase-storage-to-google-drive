@@ -1,6 +1,6 @@
+import { extractError } from "@/utils/errors";
+import { useSharedDrive } from "@/utils/util";
 import { google } from "googleapis";
-import { extractError } from "../utils/errors";
-import { useSharedDrive } from "../utils/util";
 
 const DRIVE_SCOPES = {
   FULL: "https://www.googleapis.com/auth/drive",
