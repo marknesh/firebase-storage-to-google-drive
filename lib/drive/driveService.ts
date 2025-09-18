@@ -1,13 +1,13 @@
 import { config } from "@/config";
+import { Auth } from "@/lib/drive/auth";
 import { extractError } from "@/utils/errors";
-import { drive_v3, google } from "googleapis";
-import { Readable } from "node:stream";
 import {
   checkIfUseSharedDrive,
   getFileName,
   useSharedDrive,
-} from "../../utils/util";
-import { Auth } from "./auth";
+} from "@/utils/util";
+import { drive_v3, google } from "googleapis";
+import { Readable } from "node:stream";
 
 export class DriveClient {
   private drive: null | drive_v3.Drive = null;

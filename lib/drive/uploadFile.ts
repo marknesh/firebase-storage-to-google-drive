@@ -51,7 +51,7 @@ const createSubFolders = async (filePath: string) => {
       if (id) {
         currentParentId = id;
       }
-      console.log(`skipped folder ${folder} upload`);
+      console.log(`Skipped ${folder} (folder already uploaded)`);
     } else {
       const driveResponse = await driveClient.createFile({
         name: folder,
@@ -122,7 +122,7 @@ export async function uploadFile() {
         firebaseHex &&
         firebaseHex === matchingDriveFile?.md5CheckSum
       ) {
-        console.log(`Skipping ${file.name}, already uploaded.`);
+        console.log(`Skipped ${file.name} (file already uploaded)`);
         continue;
       }
 
