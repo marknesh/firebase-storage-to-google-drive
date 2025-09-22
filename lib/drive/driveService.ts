@@ -30,7 +30,7 @@ export class DriveClient {
   }
 
   /**
-   * Example: Get storage quota
+   * @returns the storage quota
    */
   async getStorageQuota() {
     const drive = await this.initDrive();
